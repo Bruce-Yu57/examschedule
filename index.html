@@ -1,445 +1,378 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-TW">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臺北市立蘭州國中114學年度第二學期八年級數學科第一次段考試題詳解</title>
-    <!-- 引入 Tailwind CSS 以進行快速、美觀的排版 -->
+    <title>蘭州國中段考時程顯示</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 設定 MathJax 以支援 $...$ 的行內數學式語法 -->
-    <script>
-        MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
-            },
-            svg: {
-                fontCache: 'global'
-            }
-        };
-    </script>
-    <!-- 引入 MathJax 核心程式 -->
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        /* 針對數學式避免超出邊界的小調整 */
-        .mathjax-container {
-            overflow-x: auto;
-            overflow-y: hidden;
-        }
         body {
-            font-family: 'Helvetica Neue', Arial, 'LiHei Pro', '微軟正黑體', sans-serif;
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+            overflow: hidden; /* 防止捲動條出現 */
+        }
+        
+        .clock-font {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        /* 自訂捲軸樣式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+
+        /* --- 高亮樣式設計 (Final Design) --- */
+        .active-period {
+            background-color: #475569; /* Slate 700: 比背景稍亮，維持深色風格 */
+            border: 8px solid #eab308; /* Yellow 500: 邊框加粗 */
+            transform: scale(1.03);    /* 微微放大 */
+            box-shadow: 0 0 30px rgba(234, 179, 8, 0.25); /* 淡淡的黃色光暈 */
+            z-index: 10;
+        }
+
+        /* 高亮時，時間與科目維持極致白，確保對比度 */
+        .active-period .period-time, 
+        .active-period .period-subject {
+            color: #ffffff; 
+            font-weight: 900;
+        }
+        
+        /* 高亮時，節次名稱 (如"第二節") 轉為黃色以呼應邊框 */
+        .active-period .period-name {
+            color: #facc15; /* Yellow 400 */
+        }
+
+        /* 高亮時，顯示的狀態標籤 */
+        .active-period .status-badge {
+            background-color: #eab308;
+            color: #000000;
+        }
+
+        /* 彈出視窗背景模糊 */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
         }
     </style>
-</head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen pb-12">
 
-    <!-- 頁首與標題 -->
-    <header class="bg-blue-800 text-white py-8 shadow-md">
-        <div class="max-w-4xl mx-auto px-4">
-            <h1 class="text-2xl md:text-3xl font-bold text-center leading-snug">
-                臺北市立蘭州國中114學年度第二學期<br>八年級數學科 第一次段考試題詳解
-            </h1>
+</head>
+<body class="h-screen w-screen flex flex-col">
+    <!-- Header -->
+    <header class="h-[8vh] bg-slate-800 flex items-center justify-between px-8 border-b border-slate-700 shadow-lg shrink-0">
+        <h1 class="text-3xl font-bold tracking-wider text-blue-400">蘭州國中段考時程表</h1>
+        <div class="flex space-x-4 items-center">
+            <button onclick="openSettings()" class="px-4 py-2 rounded-lg bg-slate-600 hover:bg-slate-500 text-slate-200 font-bold border border-slate-500 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                設定人數
+            </button>
+            <div class="w-px h-8 bg-slate-600 mx-2"></div>
+            <button onclick="setDay(1)" id="btn-day1" class="px-6 py-2 rounded-lg text-xl font-bold transition-colors duration-200">第一天
+</button>
+            <button onclick="setDay(2)" id="btn-day2" class="px-6 py-2 rounded-lg text-xl font-bold transition-colors duration-200">第二天
+</button>
         </div>
     </header>
 
-    <!-- 主要內容區 -->
-    <main class="max-w-4xl mx-auto px-4 mt-8 space-y-10">
-
-        <!-- 選擇題區塊 -->
-        <section>
-            <h2 class="text-2xl font-bold border-b-4 border-blue-500 pb-2 mb-6 text-blue-900">一、選擇題</h2>
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Left Side: Schedule (65% width) -->
+        <section class="w-[65%] h-full bg-slate-900 border-r border-slate-700 flex flex-col relative">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="schedule-container">
+                <!-- Schedule items will be injected here via JS -->
+            </div>
             
-            <div class="space-y-6">
-                <!-- 第 1 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">1. 下列何者表示 1 到 100 中所有數的和</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（A）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>計算 1 到 100 中所有數的和，首項 $a_1=1$ ，末項 $a_{100}=100$ ，項數 $n=100$ 。</p>
-                        <p>利用等差級數求和公式 $S_n = \frac{n(a_1+a_n)}{2}$ ，可得和為 $\frac{100 \times (1+100)}{2}$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 2 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">2. 已知一等差數列的首項為 -10 ，公差為 4 ，末項為 22，則關於此等差數列的敘述何者錯誤？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（C）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>已知 $a_1 = -10$ ，公差 $d = 4$ ，末項 $a_n = 22$ 。</p>
-                        <p>由 $a_n = a_1 + (n-1)d \Rightarrow 22 = -10 + (n-1)4 \Rightarrow 32 = 4(n-1) \Rightarrow n-1 = 8 \Rightarrow n = 9$ 。</p>
-                        <ul class="list-disc pl-6 mt-2 space-y-1">
-                            <li>（A）項數 $n = 9$ ，正確。</li>
-                            <li>（B）$a_8 = a_1 + 7d = -10 + 7 \times 4 = -10 + 28 = 18$ ，正確。</li>
-                            <li>（C）等差中項（即第 5 項） $= \frac{a_1 + a_n}{2} = \frac{-10 + 22}{2} = 6 \neq 12$ ，錯誤。</li>
-                            <li>（D）總和 $S_n = \frac{9 \times (-10+22)}{2} = \frac{9 \times 12}{2} = 54$ ，正確。</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- 第 3 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">3. 下列四個選項中的數列，哪一個不是等差數列？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（D）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <ul class="list-disc pl-6 space-y-1">
-                            <li>（A）公差為 $0$ 的等差數列。</li>
-                            <li>（B）公差為 $\sqrt{7}$ 的等差數列。</li>
-                            <li>（C）各項化簡為 $1, 2, 3, 4, 5$ ，是公差為 $1$ 的等差數列。</li>
-                            <li>（D）後項減前項的差不相等（如 $\sqrt{2}-\sqrt{1} \neq \sqrt{3}-\sqrt{2}$），不是等差數列。</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- 第 4 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">4. 已知等差數列 $5, a, 9, b, c, \ldots$ ，則 $a+b+c=$ ？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（D）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>數列 $5, a, 9, b, c$ 為等差數列。</p>
-                        <p>$a$ 為 $5$ 與 $9$ 的等差中項 $\Rightarrow a = \frac{5+9}{2} = 7$ 。</p>
-                        <p>公差 $d = 7 - 5 = 2$ 。</p>
-                        <p>因此 $b = 9 + 2 = 11$ ， $c = 11 + 2 = 13$ 。</p>
-                        <p>求 $a+b+c = 7 + 11 + 13 = 31$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 5 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">5. 若有一個等差數列的前 3 項為 $2,5,8$ ，則下列何者是此等差數列的其中一項？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（B）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>首項 $a_1 = 2$ ，公差 $d = 5 - 2 = 3$ 。</p>
-                        <p>此數列的一般項為 $a_n = 2 + (n-1)3 = 3n - 1$ 。</p>
-                        <p>這表示該數列的每一項加 $1$ 後，必為 $3$ 的倍數。</p>
-                        <ul class="list-disc pl-6 mt-2 space-y-1">
-                            <li>（A）$24+1=25$（非3的倍數）</li>
-                            <li>（B）$35+1=36$（是3的倍數，當 $n=12$ 時）</li>
-                            <li>（C）$46+1=47$（非3的倍數）</li>
-                            <li>（D）$72+1=73$（非3的倍數）</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- 第 6 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">6. 若 $9、16$ 的等比中項為 $x$ ，求 $x=$ ？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（C）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>$x$ 為 $9$ 和 $16$ 的等比中項，則 $x^2 = 9 \times 16 = 144$ 。</p>
-                        <p>解得 $x = \pm 12$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 7 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">7. 若 $a, b, c, d, e$ 為等差數列，且此五個數的和為 80 。已知 $a=6$ ，則此數列的公差為何？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（A）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>五項等差數列的和為 $S_5 = 5 \times$ 中間項（即 $c$） $= 80 \Rightarrow c = 16$ 。</p>
-                        <p>已知 $a = 6$ （首項），且 $c$ 為第 3 項，即 $c = a + 2d$ 。</p>
-                        <p>$16 = 6 + 2d \Rightarrow 10 = 2d \Rightarrow d = 5$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 8 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">8. 一等差級數 $48+45+\cdots \cdots$ 。若前 $n$ 項的和為 -105 ，則 $n$ 可能的值為何？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（B）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>此等差級數首項 $a_1 = 48$ ，公差 $d = 45 - 48 = -3$ 。</p>
-                        <p>前 $n$ 項和 $S_n = \frac{n[2a_1 + (n-1)d]}{2} = -105$</p>
-                        <p>$\Rightarrow \frac{n[96 - 3(n-1)]}{2} = -105$</p>
-                        <p>$\Rightarrow n(99 - 3n) = -210$</p>
-                        <p>$\Rightarrow 33n - n^2 = -70$</p>
-                        <p>$\Rightarrow n^2 - 33n - 70 = 0$</p>
-                        <p>$\Rightarrow (n-35)(n+2) = 0$</p>
-                        <p>解得 $n = 35$ 或 $n = -2$ （項數必為正整數，不合）。</p>
-                    </div>
-                </div>
-
-                <!-- 第 9 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">9. 若 $x, y, 8, z, 16$ 為等比數列，則 $x$ 、 $y$ 、 $z$ 三數之積為何 ？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（A）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>$x, y, 8, z, 16$ 為等比數列。</p>
-                        <p>設公比為 $r$ ，則 $8 \times r^2 = 16 \Rightarrow r^2 = 2$ 。</p>
-                        <p>$x$ 是 8 往回推兩項： $x = \frac{8}{r^2} = \frac{8}{2} = 4$ 。</p>
-                        <p>$y \times z$ 等於等比中項 8 的平方（或首末項乘積）： $y \times z = 8^2 = 64$ 。</p>
-                        <p>故 $x \times y \times z = 4 \times 64 = 256$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 10 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">10. 蘭花國中品格班推行說好話運動...某甲學期末計算最後一次，他寫了 26 遍。累積下來，他總共寫了幾遍「說好話」？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（C）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>次數形成等差數列： $10, 12, 14, \ldots , 26$ 。</p>
-                        <p>首項 $a_1 = 10$ ，公差 $d = 2$ ，末項 $a_n = 26$ 。</p>
-                        <p>$26 = 10 + (n-1)2 \Rightarrow 16 = 2(n-1) \Rightarrow n-1 = 8 \Rightarrow n = 9$ （總共寫了 9 次）。</p>
-                        <p>總遍數 $S_9 = \frac{9(10 + 26)}{2} = \frac{9 \times 36}{2} = 162$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 11 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">11. 已知一次函數 $y=-x+7$ 的圖形通過 $(-3, a)$ ，則 $a=$ ？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（A）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>將點 $(-3, a)$ 代入 $y = -x + 7$ 中，得 $a = -(-3) + 7 = 3 + 7 = 10$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 12 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">12. 右圖是益通電信公司的通話費計算方式...則下列何者正確？</h3>
-                    <img src="./image_3ae6c0.png" alt="第 12 題圖形" class="my-4 max-w-[400px] w-full h-auto rounded border" onerror="this.onerror=null; this.src='https://placehold.co/400x250/e2e8f0/475569?text=Image+3ae6c0.png';">
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（D）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>由圖形可知，超過 $300$ 秒後，費用與時間的關係為一次函數圖形，且直線通過 $(500, 190)$ 與 $(800, 250)$ 兩點。</p>
-                        <ol class="list-decimal pl-6 mt-2 space-y-2">
-                            <li><strong>求每秒付費（即直線斜率）：</strong> $\frac{250 - 190}{800 - 500} = \frac{60}{300} = 0.2$ （元/秒）。這代表超過 $300$ 秒後，每秒付費 $0.2$ 元。故（D）正確。</li>
-                            <li><strong>求函數與基本費：</strong><br>
-                                設 $x \ge 300$ 時，函數為 $y = 0.2x + b$。將 $(500, 190)$ 代入得：<br>
-                                $190 = 0.2 \times 500 + b \Rightarrow 190 = 100 + b \Rightarrow b = 90$。<br>
-                                所以超過 $300$ 秒的計費函數為 $y = 0.2x + 90$。<br>
-                                基本費為 $300$ 秒時的費用：代入 $x = 300$，得 $y = 0.2 \times 300 + 90 = 60 + 90 = 150$（元）。（A）錯誤。
-                            </li>
-                            <li><strong>驗證其他選項：</strong><br>
-                                通話 $400$ 秒：$y = 0.2 \times 400 + 90 = 80 + 90 = 170$（元）。（B）錯誤。<br>
-                                通話 $600$ 秒：$y = 0.2 \times 600 + 90 = 120 + 90 = 210$（元）。（C）錯誤。
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-
-                <!-- 第 13 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">13. 若一次函數 $y=a x+b$ 的圖形如右圖且此函數另通過 $P(4, m) 、 Q(n,-1)$兩點，則下列何者正確？</h3>
-                    <img src="./image_310066.png" alt="第 13 題圖形" class="my-4 max-w-[300px] w-full h-auto rounded border" onerror="this.onerror=null; this.src='https://placehold.co/300x300/e2e8f0/475569?text=Image+310066.png';">
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（C）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>由圖形可知，直線通過 $(1, 3)$ 和 $(-2, -3)$ 兩點。</p>
-                        <p>設一次函數為 $y = ax + b$ ，代入兩點：</p>
-                        <p>$3 = a + b$ ⋯⋯①</p>
-                        <p>$-3 = -2a + b$ ⋯⋯②</p>
-                        <p>① $-$ ② 得 $6 = 3a \Rightarrow a = 2$ ，代回①得 $b = 1$ 。</p>
-                        <p>故函數為 $y = 2x + 1$ 。</p>
-                        <p>代入 $P(4, m) \Rightarrow m = 2(4) + 1 = 9$ 。</p>
-                        <p>代入 $Q(n, -1) \Rightarrow -1 = 2n + 1 \Rightarrow n = -1$ 。</p>
-                        <p>選項中只有（C）$m=9$ 正確。</p>
-                    </div>
-                </div>
-
-                <!-- 第 14 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">14. 已知常數函數 $y=a$ ，在 $x=5$ 時的函數值為 9 ，當 $x =-5$ 時，函數值為多少？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（B）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>常數函數 $y = a$ 代表無論 $x$ 代入多少，其函數值皆固定不變。</p>
-                        <p>已知當 $x = 5$ 時，函數值為 $9$ ，故 $a = 9$ 。</p>
-                        <p>當 $x = -5$ 時，函數值依然為 $9$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 15 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">15. 若 $(a-\mathrm{b}), 16, ~(a+3 \mathrm{b})$ 為等差數列，且 $4 a, 10, 2 b$ 也為等差數列，則 $a-\mathrm{b}=$ ？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（A）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>由等差中項性質可知：</p>
-                        <p>第一組數列： $2 \times 16 = (a-b) + (a+3b) \Rightarrow 32 = 2a + 2b \Rightarrow a+b = 16$ ⋯⋯①</p>
-                        <p>第二組數列： $2 \times 10 = 4a + 2b \Rightarrow 20 = 4a + 2b \Rightarrow 2a+b = 10$ ⋯⋯②</p>
-                        <p>② $-$ ① 得 $a = -6$ 。</p>
-                        <p>將 $a = -6$ 代回①，得 $-6 + b = 16 \Rightarrow b = 22$ 。</p>
-                        <p>求 $a - b = -6 - 22 = -28$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 16 題 -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-2">16. 右圖是正八邊形 $A B C D E F G H$ ... 已知甲、乙第1次相遇在 $F$ 點，則第 42 次相遇在哪一點？</h3>
-                    <div class="mb-3 text-red-600 font-bold text-lg">答案：（B）</div>
-                    <div class="text-slate-700 space-y-1 mathjax-container">
-                        <p><span class="font-semibold text-slate-900">詳解：</span></p>
-                        <p>正八邊形共 $8$ 個邊。</p>
-                        <p>甲順時針走到 $F$ 點共走了 $5$ 個邊距，乙逆時針走到 $F$ 點共走了 $3$ 個邊距。</p>
-                        <p>兩人速率比為 甲：乙 $= 5 : 3$ 。</p>
-                        <p>每次相遇，兩人合走了一整圈（$8$ 個邊距）。</p>
-                        <p>第 $42$ 次相遇時，兩人共走了 $42 \times 8 = 336$ 個邊距。</p>
-                        <p>其中甲所走的距離為 $336 \times \frac{5}{8} = 210$ 個邊距。</p>
-                        <p>以甲的起點 $A$ 點算起， $210 \div 8 = 26 \dots 2$ （繞了 $26$ 圈又多 $2$ 個邊距）。</p>
-                        <p>甲順時針走 $2$ 個邊距，會停在 $C$ 點。</p>
-                    </div>
-                </div>
-
+            <!-- 底部提示 -->
+            <div class="h-[6vh] bg-slate-800 flex items-center justify-center border-t border-slate-700 shrink-0">
+                <p class="text-slate-400 text-lg"> 請同學遵守考場規則，仔細作答。</p>
             </div>
         </section>
 
-        <!-- 填充題區塊 -->
-        <section class="mt-12">
-            <h2 class="text-2xl font-bold border-b-4 border-emerald-500 pb-2 mb-6 text-emerald-900">二、填充題</h2>
+        <!-- Right Side: Clock (35% width) -->
+        <section class="w-[35%] h-full bg-black flex flex-col items-center justify-center relative py-8">
+            <!-- Current Date -->
+            <div class="text-4xl text-slate-400 mb-2 font-bold" id="clock-date">
+                Loading...
+            </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 第 1 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">1. 請問第 100 個出現的數字 = \_\_\_\_。</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$4$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>此數列以 $1, 2, 3, 4, 5, 6$ 為一個循環，每循環有 $6$ 個數。</p>
-                        <p>$100 \div 6 = 16 \dots 4$</p>
-                        <p>代表循環了 $16$ 次後，第 $100$ 個數字是第 $17$ 次循環的第 $4$ 個數，即為 $4$ 。</p>
-                    </div>
-                </div>
+            <!-- Big Time -->
+            <div class="flex items-baseline clock-font text-white leading-none">
+                <span id="clock-hours" class="text-[12rem] font-bold">00</span>
+                <span class="text-[8rem] px-2 animate-pulse text-slate-500">:</span>
+                <span id="clock-minutes" class="text-[12rem] font-bold">00</span>
+            </div>
+            
+            <!-- Seconds (Smaller) -->
+            <div class="mt-2 mb-8">
+                <span id="clock-seconds" class="clock-font text-[6rem] text-blue-300 font-bold">00</span>
+            </div>
 
-                <!-- 第 2 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">2. $(-60)+(-56)+\dots+(-32) =$ \_\_\_\_。</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$-368$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>首項 $a_1 = -60$ ，公差 $d = -56 - (-60) = 4$ ，末項 $a_n = -32$ 。</p>
-                        <p>項數 $n$ ： $-32 = -60 + (n-1)4 \Rightarrow 28 = 4(n-1) \Rightarrow n = 8$ 。</p>
-                        <p>總和 $S_8 = \frac{8 \times (-60 + (-32))}{2} = 4 \times (-92) = -368$ 。</p>
-                    </div>
-                </div>
+            <!-- Current Status Label (已縮小以騰出空間) -->
+            <div class="mb-8 px-6 py-2 bg-slate-800 rounded-full border border-slate-700">
+                <span class="text-xl text-blue-300 font-bold tracking-widest">現在時刻 Current Time</span>
+            </div>
 
-                <!-- 第 3 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">3. 求第 20 項 = \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$78$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>$a_{20} = a_1 + 19d = 2 + 19 \times 4 = 2 + 76 = 78$ 。</p>
-                    </div>
+            <!-- Attendance Display (New) -->
+            <div class="w-[85%] bg-slate-900/50 rounded-2xl border border-slate-800 p-6 flex justify-around items-center backdrop-blur-sm">
+                <div class="flex flex-col items-center">
+                    <span class="text-slate-400 text-2xl font-bold mb-2 tracking-widest">應到人數</span>
+                    <span id="display-expected" class="text-7xl text-blue-400 font-mono font-bold tracking-tight">0</span>
                 </div>
-
-                <!-- 第 4 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">4. 則 $A-B =$ \_\_\_\_。</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$-50$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>$A = 1+3+5+\dots+99$ （共 $50$ 項）</p>
-                        <p>$B = 2+4+6+\dots+100$ （共 $50$ 項）</p>
-                        <p>$A - B = (1-2) + (3-4) + \dots + (99-100)$</p>
-                        <p>$= (-1) \times 50 = -50$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 5 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">5. 求此等差級數的第 15 項 = \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$35$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>$S_{15} = \frac{15(a_1 + a_{15})}{2} = 300$</p>
-                        <p>$\Rightarrow \frac{15(5 + a_{15})}{2} = 300$</p>
-                        <p>$\Rightarrow 5 + a_{15} = 40 \Rightarrow a_{15} = 35$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 6 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">6. 求此等差級數前 25 項的和 = \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$-1000$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>$S_{25} = \frac{25[2a_1 + (25-1)d]}{2}$</p>
-                        <p>$= \frac{25[2(20) + 24(-5)]}{2}$</p>
-                        <p>$= \frac{25[40 - 120]}{2} = 25 \times (-40) = -1000$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 7 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">7. 則 $\frac{a_{30}}{a_{20}} =$ \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$32$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>公比 $r = \frac{a_3}{a_2} = \sqrt{2}$ 。</p>
-                        <p>$\frac{a_{30}}{a_{20}} = r^{10} = (\sqrt{2})^{10} = 2^5 = 32$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 8 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">8. 已知 $a_3>0$ ，則 $a_5=$ \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$243$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>$a_4 = a_2 \times r^2 \Rightarrow -81 = -9 \times r^2 \Rightarrow r^2 = 9 \Rightarrow r = \pm 3$ 。</p>
-                        <p>已知 $a_3 = a_2 \times r = -9r$ ，且 $a_3 > 0$ ，故 $r = -3$ 。</p>
-                        <p>求 $a_5 = a_4 \times r = -81 \times (-3) = 243$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 9 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">9. 試寫出此函數 $y=$ \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$y = 16x + 48$ $(x \ge 2)$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>超過 $2$ 公里的部分為 $(x - 2)$ 公里。</p>
-                        <p>每 $0.5$ 公里跳 $8$ 元， $(x - 2)$ 公里有 $2(x-2)$ 個級距。</p>
-                        <p>總費用 $y = 80 + 8 \times 2(x - 2) = 16x + 48$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 10 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">10. 搭計程車 8 公里，需花費多少 \_\_\_\_元</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$176$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>將 $x = 8$ 代入函數 $y = 16x + 48$ 。</p>
-                        <p>$y = 16(8) + 48 = 128 + 48 = 176$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 11 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">11. 則此兩等差級數的和，相加的結果為 \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：$315$</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <p>總和 $= \frac{21}{2} [(a_1 + a_{21}) + (b_1 + b_{21})]$ 。</p>
-                        <p>由等差中項： $= \frac{21}{2} [(a_2 + a_{20}) + (b_2 + b_{20})]$</p>
-                        <p>$= \frac{21}{2} [(a_2 + b_{20}) + (a_{20} + b_2)]$</p>
-                        <p>$= \frac{21}{2} [33 + (-3)] = \frac{21}{2} \times 30 = 315$ 。</p>
-                    </div>
-                </div>
-
-                <!-- 第 12 題 -->
-                <div class="bg-white rounded-lg shadow p-6 border-t-4 border-emerald-400">
-                    <h3 class="font-semibold mb-2">12. 下列哪些敘述是正確的？ \_\_\_\_</h3>
-                    <div class="mb-2 text-emerald-700 font-bold">答案：（A）, （B）, （D）</div>
-                    <div class="text-slate-600 text-sm mathjax-container">
-                        <ul class="list-disc pl-4 space-y-1">
-                            <li>（A）正確。此為等差數列基本定義。</li>
-                            <li>（B）正確。利用 $a_m - a_n = (m-n)d$ 即可推算。</li>
-                            <li>（C）錯誤。等比三數中間數的平方是前後兩數「乘積」（$b^2 = ac$）。</li>
-                            <li>（D）正確。對應相加後的新數列，公差為原兩數列公差之和，仍為等差數列。</li>
-                        </ul>
-                    </div>
+                <div class="w-px h-24 bg-slate-700"></div>
+                <div class="flex flex-col items-center">
+                    <span class="text-slate-400 text-2xl font-bold mb-2 tracking-widest">實到人數</span>
+                    <span id="display-actual" class="text-7xl text-green-400 font-mono font-bold tracking-tight">0</span>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- 頁尾 -->
-    <footer class="mt-16 text-center text-slate-500 text-sm">
-        <p>此詳解網頁由 AI 輔助生成 | 僅供學習參考使用</p>
-    </footer>
+    <!-- Attendance Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal-backdrop">
+        <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-600 w-[400px] p-8 transform transition-all scale-100">
+            <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                設定考場人數
+            </h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-slate-400 text-lg font-bold mb-2">應到人數 (Expected)</label>
+                    <input type="number" id="input-expected" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-2xl text-white font-mono focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="0">
+                </div>
+                
+                <div>
+                    <label class="block text-slate-400 text-lg font-bold mb-2">實到人數 (Actual)</label>
+                    <input type="number" id="input-actual" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-2xl text-white font-mono focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" placeholder="0">
+                </div>
+            </div>
 
+            <div class="flex justify-end gap-3 mt-8">
+                <button onclick="closeSettings()" class="px-6 py-2 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 font-bold transition-colors">取消</button>
+                <button onclick="saveSettings()" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-500 font-bold shadow-lg transition-colors">儲存設定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 資料設定 (Configuration) ---  ***** 手動設定 part 1/1 *****
+        const schedules = {
+            1: [ // 第一天
+                { name: "第一節", time: "08:30-09:15", start: "08:30", end: "09:00", subject: "自 習" },
+                { name: "第二節", time: "09:25-10:10", start: "09:00", end: "10:10", subject: "公民06 / 歷史08 / 地理09" },
+                { name: "第三節", time: "10:20-11:05", start: "10:20", end: "11:05", subject: "自 習" },
+                { name: "第四節", time: "11:15-12:00", start: "11:15", end: "12:00", subject: "理 化 12" },
+		{ name: "第五節", time: "13:15-14:05", start: "13:15", end: "14:05", subject: "作 文" },
+                { name: "第六節", time: "14:20-15:05", start: "14:20", end: "15:05", subject: "自 習" },
+                { name: "第七節", time: "15:15-16:00", start: "15:15", end: "16:00", subject: "國 文 01" },
+
+            ],
+            2: [ // 第二天
+                { name: "第一節", time: "08:30-09:00", start: "08:30", end: "09:00", subject: "自 習" },
+                { name: "第二節", time: "09:00-10:10", start: "09:00", end: "10:10", subject: "英 語 02" },
+                { name: "第三節", time: "10:20-11:05", start: "10:20", end: "11:05", subject: "自 習" },
+                { name: "第四節", time: "11:15-12:00", start: "11:15", end: "12:00", subject: "數 學 04" },
+               
+            ]
+        };
+
+        let currentDayIdx = 1;
+        
+        // --- 2. DOM 元素 ---
+        const container = document.getElementById('schedule-container');
+        const btnDay1 = document.getElementById('btn-day1');
+        const btnDay2 = document.getElementById('btn-day2');
+        const elDate = document.getElementById('clock-date');
+        const elHours = document.getElementById('clock-hours');
+        const elMinutes = document.getElementById('clock-minutes');
+        const elSeconds = document.getElementById('clock-seconds');
+        
+        // Modal Elements
+        const modal = document.getElementById('settings-modal');
+        const inputExpected = document.getElementById('input-expected');
+        const inputActual = document.getElementById('input-actual');
+        const displayExpected = document.getElementById('display-expected');
+        const displayActual = document.getElementById('display-actual');
+
+        // --- 3. 初始化 (Initialization) ---
+        function init() {
+            // 自動偵測日期以選擇預設頁籤
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            
+            if (month === 1 && date === 16) {
+                currentDayIdx = 2;
+            } else {
+                currentDayIdx = 1;
+            }
+
+            // 載入儲存的人數設定
+            loadAttendanceSettings();
+
+            renderSchedule();
+            updateClock();
+            
+            // 啟動定時器
+            setInterval(updateClock, 5000);       // 每秒更新時鐘
+            setInterval(checkActiveStatus, 1000); // 每秒檢查考試狀態
+        }
+
+        // --- 4. 切換日期功能 ---
+        window.setDay = function(dayIndex) {
+            currentDayIdx = dayIndex;
+            renderSchedule();
+            checkActiveStatus(); 
+        };
+
+        // --- 5. 渲染行程表 ---
+        function renderSchedule() {
+            if (currentDayIdx === 1) {
+                btnDay1.className = "px-6 py-2 rounded-lg text-xl font-bold bg-blue-600 text-white shadow-lg scale-105";
+                btnDay2.className = "px-6 py-2 rounded-lg text-xl font-bold bg-slate-700 text-slate-400 hover:bg-slate-600";
+            } else {
+                btnDay1.className = "px-6 py-2 rounded-lg text-xl font-bold bg-slate-700 text-slate-400 hover:bg-slate-600";
+                btnDay2.className = "px-6 py-2 rounded-lg text-xl font-bold bg-blue-600 text-white shadow-lg scale-105";
+            }
+
+            const data = schedules[currentDayIdx];
+            let html = '';
+            
+            data.forEach((item, index) => {
+                // Determine font size based on subject length - INCREASED SIZES
+                // subjectFontSize: For short subjects (<10 chars) uses text-7xl or text-8xl
+                //                  For long subjects uses text-5xl
+                const subjectFontSize = item.subject.length > 10 ? 'text-5xl' : 'text-8xl';
+                
+                html += `
+                <div id="period-${index}" class="period-row flex items-center p-4 bg-slate-800 rounded-xl border border-slate-700 transition-all duration-300">
+                    <!-- Period & Time - Adjusted Width to 35% for Larger Text -->
+                    <div class="w-[38%] flex flex-col justify-center border-r border-slate-600 pr-2">
+                        <span class="period-name text-4xl text-slate-400 font-bold mb-1">${item.name}</span>
+                        <span class="period-time text-6xl text-white font-mono tracking-tight leading-none">${item.time}</span>
+                    </div>
+                    
+                    <!-- Subject - Adjusted Width to 62% and Increased Font Sizes -->
+                    <div class="w-[62%] pl-6 flex items-center justify-between">
+                        <span class="period-subject ${subjectFontSize} font-bold text-slate-100 tracking-tight leading-none">${item.subject}</span>
+                        <span class="status-badge hidden px-4 py-2 rounded-lg text-xl font-bold uppercase tracking-widest ml-4 whitespace-nowrap">進行中 NOW</span>
+                    </div>
+                </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- 6. 更新時鐘 ---
+        function updateClock() {
+            const now = new Date();
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dateStr = `${now.getMonth() + 1}/${now.getDate()} (${days[now.getDay()]})`;
+            elDate.innerText = dateStr;
+
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+
+            elHours.innerText = h;
+            elMinutes.innerText = m;
+            elSeconds.innerText = s;
+        }
+
+        // --- 7. 檢查並高亮 (修改版：只檢查時間，不檢查日期) ---
+        function checkActiveStatus() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            // ** 移除日期限制 **
+            // 讓使用者只要切換到該 Tab，時間到了就高亮，方便模擬確認
+            const isSimulatingExam = true; 
+
+            const data = schedules[currentDayIdx];
+
+            data.forEach((item, index) => {
+                const row = document.getElementById(`period-${index}`);
+                if (!row) return;
+
+                const [startH, startM] = item.start.split(':').map(Number);
+                const startTotal = startH * 60 + startM;
+
+                const [endH, endM] = item.end.split(':').map(Number);
+                const endTotal = endH * 60 + endM;
+
+                // 只要時間符合就高亮
+                if (isSimulatingExam && currentMinutes >= startTotal && currentMinutes < endTotal) {
+                    
+                    if (!row.classList.contains('active-period')) {
+                        document.querySelectorAll('.period-row').forEach(r => {
+                            r.classList.remove('active-period');
+                            r.classList.add('bg-slate-800');
+                            r.querySelector('.status-badge').classList.add('hidden');
+                        });
+                        
+                        row.classList.remove('bg-slate-800');
+                        row.classList.add('active-period');
+                        row.querySelector('.status-badge').classList.remove('hidden');
+                        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                } else {
+                     if (row.classList.contains('active-period')) {
+                        row.classList.remove('active-period');
+                        row.classList.add('bg-slate-800');
+                        row.querySelector('.status-badge').classList.add('hidden');
+                     }
+                }
+            });
+        }
+
+        // --- 8. 人數設定相關功能 ---
+        
+        window.openSettings = function() {
+            // 開啟時將目前顯示的值填入 input
+            inputExpected.value = displayExpected.innerText;
+            inputActual.value = displayActual.innerText;
+            modal.classList.remove('hidden');
+        };
+
+        window.closeSettings = function() {
+            modal.classList.add('hidden');
+        };
+
+        window.saveSettings = function() {
+            const expected = inputExpected.value || '0';
+            const actual = inputActual.value || '0';
+
+            displayExpected.innerText = expected;
+            displayActual.innerText = actual;
+
+            // 儲存到 localStorage 以便刷新後保留
+            localStorage.setItem('exam_expected_count', expected);
+            localStorage.setItem('exam_actual_count', actual);
+
+            closeSettings();
+        };
+
+        function loadAttendanceSettings() {
+            const savedExpected = localStorage.getItem('exam_expected_count');
+            const savedActual = localStorage.getItem('exam_actual_count');
+
+            if (savedExpected) displayExpected.innerText = savedExpected;
+            if (savedActual) displayActual.innerText = savedActual;
+        }
+
+        // 啟動程式
+        init();
+
+    </script>
 </body>
 </html>
